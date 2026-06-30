@@ -36,12 +36,6 @@ It allows users to encrypt and decrypt text, securely encrypt image files, gener
 
 ## 📸 Screenshots
 
-### 🏠 Landing Page
-
-<p align="center">
-  <img src="screenshots/landing.png" alt="Landing Page" width="800" />
-</p>
-
 ---
 
 ### 🔐 Text Encryption
@@ -56,14 +50,6 @@ It allows users to encrypt and decrypt text, securely encrypt image files, gener
 
 <p align="center">
   <img src="screenshots/image-encryption.png" alt="Image Encryption" width="800" />
-</p>
-
----
-
-### 📱 QR Code Encryption
-
-<p align="center">
-  <img src="screenshots/qr-encryption.png" alt="QR Code Encryption" width="800" />
 </p>
 
 ---
