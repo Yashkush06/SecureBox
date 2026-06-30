@@ -47,11 +47,11 @@
             </button>
         </form>
 
-        {% if result_filename and action == 'encrypt' %}
+        {% if encrypted_b64 and action == 'encrypt' %}
         <div class="result-area animate-slide-up">
             <span class="badge badge-success">Encrypted</span>
             <p>Your image has been encrypted into a secure binary format. You can now download the raw encrypted <code>.enc</code> file.</p>
-            <a href="/image/download/{{ result_filename }}" class="btn btn-success">
+            <a href="data:application/octet-stream;base64,{{ encrypted_b64 }}" download="securebox_image.enc" class="btn btn-success">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 <span>Download Encrypted File (.enc)</span>
             </a>
@@ -97,7 +97,7 @@
             </button>
         </form>
 
-        {% if result_filename and action == 'decrypt' %}
+        {% if decrypted_b64 and action == 'decrypt' %}
         <div class="result-area animate-slide-up">
             <span class="badge badge-success">Decrypted Successfully</span>
             {% if image_preview %}
@@ -105,7 +105,7 @@
                 <img src="{{ image_preview }}" alt="Decrypted Image Preview">
             </div>
             {% endif %}
-            <a href="/image/download/{{ result_filename }}" class="btn btn-success">
+            <a href="data:{{ mime }};base64,{{ decrypted_b64 }}" download="decrypted_image.{{ ext }}" class="btn btn-success">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 <span>Download Decrypted Image</span>
             </a>

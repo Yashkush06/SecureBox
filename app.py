@@ -170,15 +170,18 @@ def text_page():
 def image_page():
     """Encrypt an image file or decrypt a previously-encrypted `.enc` file.
 
-    Template variables:
-        error, success, result_filename, image_preview, action
+    Memory-only processing: does not write files to disk, supporting serverless
+    platforms like Vercel. Downloads are served via client-side base64 Data URLs.
     """
     ctx = {
         'error': '',
         'success': '',
-        'result_filename': '',
+        'encrypted_b64': '',
+        'decrypted_b64': '',
         'image_preview': '',
         'action': 'encrypt',
+        'ext': 'png',
+        'mime': 'image/png'
     }
 
     if request.method == 'POST':
@@ -202,7 +205,7 @@ def image_page():
                     ext = (
                         file.filename.rsplit('.', 1)[-1].lower()
                         if '.' in file.filename
-                        else ''
+                        else 'png'
                     )
                     if ext not in allowed:
                         ctx['error'] = (
@@ -210,11 +213,7 @@ def image_page():
                         )
                     else:
                         encrypted = image_crypto.encrypt_image(file_bytes, password)
-                        filename = f'{uuid.uuid4().hex}.enc'
-                        filepath = os.path.join(UPLOAD_FOLDER, filename)
-                        with open(filepath, 'wb') as f:
-                            f.write(encrypted)
-                        ctx['result_filename'] = filename
+                        ctx['encrypted_b64'] = base64.b64encode(encrypted).decode('utf-8')
                         ctx['success'] = (
                             'Image encrypted successfully! Click download to save.'
                         )
@@ -228,43 +227,18 @@ def image_page():
                     if ext == 'jpeg':
                         ext = 'jpg'
 
-                    filename = f'{uuid.uuid4().hex}.{ext}'
-                    filepath = os.path.join(UPLOAD_FOLDER, filename)
-                    with open(filepath, 'wb') as f:
-                        f.write(decrypted)
-
-                    # Base64-encoded preview for inline display
-                    preview_b64 = base64.b64encode(decrypted).decode('utf-8')
+                    decrypted_b64 = base64.b64encode(decrypted).decode('utf-8')
                     mime = f'image/{fmt.lower()}'
-                    ctx['image_preview'] = f'data:{mime};base64,{preview_b64}'
-                    ctx['result_filename'] = filename
+                    ctx['decrypted_b64'] = decrypted_b64
+                    ctx['ext'] = ext
+                    ctx['mime'] = mime
+                    ctx['image_preview'] = f'data:{mime};base64,{decrypted_b64}'
                     ctx['success'] = 'Image decrypted successfully!'
 
             except Exception as e:
                 ctx['error'] = str(e)
 
     return render_template('image.html', active_page='image', **ctx)
-
-
-# ---------------------------------------------------------------------------
-# Route 4 — Secure File Download
-# ---------------------------------------------------------------------------
-
-@app.route('/image/download/<filename>')
-def download_file(filename):
-    """Serve a file from the uploads directory as an attachment.
-
-    Security: rejects any filename containing path separators or traversal
-    sequences to prevent directory-traversal attacks.
-    """
-    if '..' in filename or '/' in filename or '\\' in filename:
-        abort(400)
-
-    filepath = os.path.join(UPLOAD_FOLDER, filename)
-    if not os.path.exists(filepath):
-        abort(404)
-
-    return send_file(filepath, as_attachment=True, download_name=filename)
 
 
 # ---------------------------------------------------------------------------
