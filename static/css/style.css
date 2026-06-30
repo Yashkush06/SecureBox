@@ -1197,4 +1197,68 @@ tr:hover td {
     .features-section {
         padding: 40px 20px 80px;
     }
+
+    /* Mobile optimisations for cards and tables */
+    .card {
+        padding: 20px;
+    }
+
+    th, td {
+        padding: 12px 14px;
+        font-size: 0.8rem;
+    }
+
+    .key-visual-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        font-size: 0.85rem;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+}
+
+/* Extra small screens (Phones) */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 90px 12px 30px;
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    th, td {
+        padding: 10px 10px;
+        font-size: 0.75rem;
+    }
+
+    /* Scaling down bar charts to fit phone screen width */
+    .chart-y-axis {
+        width: 48px;
+        font-size: 0.65rem;
+        padding-right: 6px;
+    }
+
+    .bar-column {
+        width: 44px;
+    }
+
+    .bar-filled {
+        width: 20px;
+    }
+
+    .bar-value-label {
+        font-size: 0.65rem;
+        margin-bottom: 4px;
+    }
+
+    .bar-axis-label {
+        font-size: 0.7rem;
+        bottom: -20px;
+    }
+
+    .bar-chart-visual {
+        height: 180px;
+    }
 }
