@@ -34,34 +34,6 @@ It allows users to encrypt and decrypt text, securely encrypt image files, gener
 
 ---
 
-## 📸 Screenshots
-
----
-
-### 🔐 Text Encryption
-
-<p align="center">
-  <img src="screenshots/text-encryption.png" alt="Text Encryption" width="800" />
-</p>
-
----
-
-### 🖼️ Image Encryption
-
-<p align="center">
-  <img src="screenshots/image-encryption.png" alt="Image Encryption" width="800" />
-</p>
-
----
-
-### 📊 Compare Algorithms
-
-<p align="center">
-  <img src="screenshots/compare-algorithms.png" alt="Compare Algorithms" width="800" />
-</p>
-
----
-
 ## ✨ Features
 
 ### 🔐 Text Encryption
