@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="screenshots/logo.png" alt="SecureBox Logo" width="600" />
+  <img src="logo/SecureBoxlogogif.gif" alt="SecureBox Logo" width="600" />
 </p>
 
 <p align="center">
