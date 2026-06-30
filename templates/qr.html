@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Encryption — SecureBox{% endblock %}
+
+{% block content %}
+<div class="page-header animate-slide-up">
+    <h1>QR Code Encryption</h1>
+    <p>Generate QR codes containing encrypted payloads and decode them securely.</p>
+</div>
+
+<!-- Educational Callout -->
+<div class="callout animate-slide-up">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+    <p><strong>Security Note:</strong> The generated QR codes store encrypted ciphertext only. The original raw text is never stored in the QR code image. Anyone scanning the QR code will only see scrambled base64 ciphertext and will require the correct algorithm and secret key to decrypt it.</p>
+</div>
+
+<div class="grid-2">
+    <!-- Panel 1: Generate Encrypted QR -->
+    <div class="card animate-slide-up">
+        <div class="card-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>Generate QR Code</span>
+        </div>
+
+        <form method="POST" action="/qr" id="generateQrForm">
+            <input type="hidden" name="action" value="generate">
+            
+            <div class="form-group">
+                <label class="form-label" for="plaintext">Plaintext</label>
+                <textarea name="plaintext" id="plaintext" class="form-textarea" placeholder="Enter text to encrypt and pack into QR..." required>{{ plaintext if action == 'generate' else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Algorithm</label>
+                <div class="tabs" style="margin-bottom: 0;">
+                    <label class="tab {% if algorithm != 'des' %}active{% endif %}">
+                        <input type="radio" name="algorithm" value="aes" {% if algorithm != 'des' %}checked{% endif %} hidden>
+                        <span>AES-256</span>
+                    </label>
+                    <label class="tab {% if algorithm == 'des' %}active{% endif %}">
+                        <input type="radio" name="algorithm" value="des" {% if algorithm == 'des' %}checked{% endif %} hidden>
+                        <span>DES</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="genKey">Secret Key</label>
+                <div class="form-input-wrapper">
+                    <input type="password" name="key" id="genKey" class="form-input" placeholder="Enter secret key" value="{{ key if action == 'generate' else '' }}" required>
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('genKey', this)" aria-label="Toggle password visibility">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>Generate QR Code</span>
+            </button>
+        </form>
+
+        {% if qr_image and action == 'generate' %}
+        <div class="result-area animate-slide-up">
+            <span class="form-label">Encrypted QR Code Preview</span>
+            <div class="qr-preview">
+                <img src="{{ qr_image }}" id="qrImageElement" alt="Encrypted QR Code">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Ciphertext embedded in QR</label>
+                <textarea class="form-textarea" style="min-height: 80px;" readonly>{{ ciphertext }}</textarea>
+            </div>
+            
+            <a href="{{ qr_image }}" download="encrypted_qr.png" class="btn btn-success">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Download QR (.png)</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Panel 2: Upload & Decode QR -->
+    <div class="card animate-slide-up">
+        <div class="card-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <span>Decode & Decrypt QR Code</span>
+        </div>
+
+        <!-- Step 1: Upload QR image to scan and extract ciphertext -->
+        <form method="POST" action="/qr" enctype="multipart/form-data" id="decodeQrForm">
+            <input type="hidden" name="action" value="decode">
+            
+            <div class="form-group">
+                <label class="form-label">Upload QR Code Image</label>
+                <div class="upload-zone" id="qrUploadZone">
+                    <input type="file" name="qr_file" accept="image/png, image/jpeg, image/jpg" required>
+                    <div class="upload-zone-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    </div>
+                    <div class="upload-zone-text">Click or drag QR image here</div>
+                    <div class="upload-zone-hint">Upload a QR image to extract ciphertext</div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-secondary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                <span>Scan & Decode QR</span>
+            </button>
+        </form>
+
+        {% if decoded_text or (ciphertext and action == 'decrypt') %}
+        <div class="result-area animate-slide-up" style="margin-top: 24px;">
+            <span class="badge badge-primary">QR Scanned successfully</span>
+            
+            <div class="form-group">
+                <label class="form-label">Extracted Ciphertext</label>
+                <textarea class="form-textarea" style="min-height: 80px;" readonly>{{ ciphertext }}</textarea>
+            </div>
+
+            <!-- Step 2: Decrypt the scanned ciphertext -->
+            <form method="POST" action="/qr" id="decryptQrTextForm">
+                <input type="hidden" name="action" value="decrypt">
+                <input type="hidden" name="ciphertext" value="{{ ciphertext }}">
+                
+                <div class="form-group">
+                    <label class="form-label">Decryption Algorithm</label>
+                    <div class="tabs" style="margin-bottom: 0;">
+                        <label class="tab {% if algorithm != 'des' %}active{% endif %}">
+                            <input type="radio" name="algorithm" value="aes" {% if algorithm != 'des' %}checked{% endif %} hidden>
+                            <span>AES-256</span>
+                        </label>
+                        <label class="tab {% if algorithm == 'des' %}active{% endif %}">
+                            <input type="radio" name="algorithm" value="des" {% if algorithm == 'des' %}checked{% endif %} hidden>
+                            <span>DES</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="decKey">Decryption Key</label>
+                    <div class="form-input-wrapper">
+                        <input type="password" name="key" id="decKey" class="form-input" placeholder="Enter key used for encryption" required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('decKey', this)" aria-label="Toggle password visibility">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 2.5 0V11"/></svg>
+                    <span>Decrypt Ciphertext</span>
+                </button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if decrypted_text and action == 'decrypt' %}
+        <div class="result-area animate-slide-up">
+            <span class="badge badge-success">Decrypted Plaintext</span>
+            <div class="form-group" style="margin-bottom: 0;">
+                <textarea class="form-textarea" style="min-height: 100px;" readonly>{{ decrypted_text }}</textarea>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="copyToClipboard('decryptedTextElement')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    <span>Copy to Clipboard</span>
+                </button>
+            </div>
+            <!-- Keep hidden element to easily copy from -->
+            <textarea id="decryptedTextElement" style="display:none;">{{ decrypted_text }}</textarea>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

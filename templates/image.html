@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Image Encryption — SecureBox{% endblock %}
+
+{% block content %}
+<div class="page-header animate-slide-up">
+    <h1>Image Encryption</h1>
+    <p>Upload, encrypt, and decrypt images locally with password-based AES-256-CBC protection.</p>
+</div>
+
+<div class="grid-2">
+    <!-- Encrypt Section -->
+    <div class="card animate-slide-up">
+        <div class="card-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <span>Encrypt Image</span>
+        </div>
+
+        <form method="POST" action="/image" enctype="multipart/form-data" id="encryptImageForm">
+            <input type="hidden" name="action" value="encrypt">
+            
+            <div class="form-group">
+                <label class="form-label">Upload Image</label>
+                <div class="upload-zone" id="encryptUploadZone">
+                    <input type="file" name="file" accept="image/png, image/jpeg, image/jpg" required>
+                    <div class="upload-zone-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </div>
+                    <div class="upload-zone-text">Click or drag image here</div>
+                    <div class="upload-zone-hint">Supports PNG, JPG, JPEG (max 10MB)</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="encPassword">Encryption Password</label>
+                <div class="form-input-wrapper">
+                    <input type="password" name="password" id="encPassword" class="form-input" placeholder="Enter password to lock image" required>
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('encPassword', this)" aria-label="Toggle password visibility">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                <span>Encrypt & Lock</span>
+            </button>
+        </form>
+
+        {% if result_filename and action == 'encrypt' %}
+        <div class="result-area animate-slide-up">
+            <span class="badge badge-success">Encrypted</span>
+            <p>Your image has been encrypted into a secure binary format. You can now download the raw encrypted <code>.enc</code> file.</p>
+            <a href="/image/download/{{ result_filename }}" class="btn btn-success">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Download Encrypted File (.enc)</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Decrypt Section -->
+    <div class="card animate-slide-up">
+        <div class="card-header">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 2.5 0V11"/></svg>
+            <span>Decrypt Image</span>
+        </div>
+
+        <form method="POST" action="/image" enctype="multipart/form-data" id="decryptImageForm">
+            <input type="hidden" name="action" value="decrypt">
+            
+            <div class="form-group">
+                <label class="form-label">Upload Encrypted File</label>
+                <div class="upload-zone" id="decryptUploadZone">
+                    <input type="file" name="file" accept=".enc" required>
+                    <div class="upload-zone-icon">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <div class="upload-zone-text">Click or drag .enc file here</div>
+                    <div class="upload-zone-hint">Upload the encrypted file to unlock it</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="decPassword">Decryption Password</label>
+                <div class="form-input-wrapper">
+                    <input type="password" name="password" id="decPassword" class="form-input" placeholder="Enter password to unlock image" required>
+                    <button type="button" class="password-toggle" onclick="togglePasswordVisibility('decPassword', this)" aria-label="Toggle password visibility">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 2.5 0V11"/></svg>
+                <span>Decrypt & Unlock</span>
+            </button>
+        </form>
+
+        {% if result_filename and action == 'decrypt' %}
+        <div class="result-area animate-slide-up">
+            <span class="badge badge-success">Decrypted Successfully</span>
+            {% if image_preview %}
+            <div class="image-preview">
+                <img src="{{ image_preview }}" alt="Decrypted Image Preview">
+            </div>
+            {% endif %}
+            <a href="/image/download/{{ result_filename }}" class="btn btn-success">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Download Decrypted Image</span>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
