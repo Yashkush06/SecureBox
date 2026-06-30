@@ -251,18 +251,6 @@ This project is intended for **educational and demonstration purposes only**.
 
 ---
 
-## 🚧 Future Improvements
-
-- [ ] User Authentication
-- [ ] File Encryption (PDF, ZIP, etc.)
-- [ ] Digital Signatures
-- [ ] AES-GCM Authenticated Encryption
-- [ ] Secure Key Storage
-- [ ] API Endpoints
-- [ ] Dark / Light Theme Toggle
-
----
-
 ## 🤝 Contributing
 
 Contributions, suggestions, and improvements are welcome!
