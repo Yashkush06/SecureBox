@@ -34,6 +34,19 @@ It allows users to encrypt and decrypt text, securely encrypt image files, gener
 
 ---
 
+## 🎬 Demo Video & Presentation
+
+<p align="center">
+  <a href="https://www.linkedin.com/posts/yash-kushwah-b16664380_pinnaclelab-python-flask-ugcPost-7477829396658139136-7N2W/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAF4Rz0IBvlkPod2Jzpyefb7XWep2MCw5e3I" target="_blank" rel="noopener">
+    <img src="logo/SecureBoxlogogif.gif" alt="Watch Demo Presentation" width="400" />
+  </a>
+</p>
+
+* 🎬 **Walkthrough Video**: [Click to view local file](demo/securebox-demo.mp4)
+* 🔗 **LinkedIn Post**: [View Presentation & Project Post on LinkedIn](https://www.linkedin.com/posts/yash-kushwah-b16664380_pinnaclelab-python-flask-ugcPost-7477829396658139136-7N2W/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAF4Rz0IBvlkPod2Jzpyefb7XWep2MCw5e3I)
+
+---
+
 ## ✨ Features
 
 ### 🔐 Text Encryption
